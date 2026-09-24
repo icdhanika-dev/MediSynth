@@ -1,35 +1,65 @@
+from patient_history_agent import PatientHistoryAgent
+from pathology_agent import PathologyAgent
+from radiology_agent import RadiologyAgent
+from treatment_agent import TreatmentAgent
+
+
 class DiagnosisOrchestrator:
 
     def __init__(self):
         self.name = "Diagnosis Orchestrator"
 
-    def analyze(self, patient_history, radiology_result, pathology_result):
+        self.patient_history_agent = PatientHistoryAgent()
+        self.pathology_agent = PathologyAgent()
+        self.radiology_agent = RadiologyAgent()
+        self.treatment_agent = TreatmentAgent()
 
-        results = {
-            "patient_history": patient_history,
-            "radiology": radiology_result,
-            "pathology": pathology_result
+    def analyze(self, patient_history, pathology_report, radiology_report):
+
+        # Step 1: Analyze patient history
+        history_result = self.patient_history_agent.analyze(
+            patient_history
+        )
+
+        # Step 2: Analyze pathology report
+        pathology_result = self.pathology_agent.analyze(
+            pathology_report
+        )
+
+        # Step 3: Analyze radiology report
+        radiology_result = self.radiology_agent.analyze(
+            radiology_report
+        )
+
+        # Step 4: Combine findings
+        diagnosis = {
+            "patient_history": history_result,
+            "pathology": pathology_result,
+            "radiology": radiology_result
         }
 
-        # Collect findings from all specialist agents
-        findings = []
+        # Step 5: Send combined diagnosis to treatment agent
+        treatment_result = self.treatment_agent.analyze(
+            diagnosis
+        )
 
-        for agent, result in results.items():
-            if result:
-                findings.append({
-                    "agent": agent,
-                    "finding": result
-                })
-
-        # Simple reconciliation
-        consolidated = {
+        # Step 6: Final result
+        return {
             "agent": self.name,
-            "specialist_findings": findings,
-            "status": "Requires physician review",
-            "message": (
-                "Findings from patient history, radiology and pathology "
-                "agents have been collected for clinical review."
-            )
+            "diagnosis": diagnosis,
+            "treatment": treatment_result
         }
 
-        return consolidated
+
+# Example usage
+if __name__ == "__main__":
+
+    orchestrator = DiagnosisOrchestrator()
+
+    result = orchestrator.analyze(
+        patient_history="Patient has fever and persistent cough",
+        pathology_report="No significant abnormality detected",
+        radiology_report="Chest X-ray shows possible lung infection"
+    )
+
+    print(result)
