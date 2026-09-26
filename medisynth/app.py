@@ -935,91 +935,87 @@ if analyze_clicked:
         }
 
         try:
-
             result = workflow.invoke(
                 initial_state
             )
 
             # Save MediSynth evidence graph to Neo4j
-        driver = GraphDatabase.driver(
-             NEO4J_URI,
-             auth=(NEO4J_USERNAME, NEO4J_PASSWORD),
-        )
-
-        with driver.session(database=NEO4J_DATABASE) as session:
-
-            session.run(
-              """
-            MERGE (c:Case {id: $case_id})
-              """,
-            case_id=case_id,
-         )
-
-         for analysis in result.get("analyses", []):
-
-             agent_name = get_value(
-                analysis,
-               "agent",
-               "Specialist Agent"
-             )
-
-              session.run(
-                """
-                MERGE (c:Case {id: $case_id})
-                MERGE (a:Agent {name: $agent_name})
-                MERGE (c)-[:ANALYZED_BY]->(a)
-                """,
-                case_id=case_id,
-                agent_name=str(agent_name),
-             )
-
-             for finding in get_value(
-                analysis,
-                "findings",
-                []
-             ):
-
-                 finding_text = get_value(
-                    finding,
-                    "finding",
-                     ""
-                 )
-
-               evidence_text = get_value(
-                  finding,
-                  "evidence",
-                   ""
-               )
-
-               if not finding_text:
-                  continue
-
-               session.run(
-                  """
-                  MERGE (c:Case {id: $case_id})
-                  MERGE (a:Agent {name: $agent_name})
-                  MERGE (f:Finding {
-                    case_id: $case_id,
-                    text: $finding_text
-                })
-
-                MERGE (c)-[:ANALYZED_BY]->(a)
-                MERGE (a)-[:FOUND]->(f)
-
-                WITH f
-                FOREACH (_ IN CASE
-                    WHEN $evidence_text <> "" THEN [1]
-                    ELSE []
-                END |
-                    MERGE (e:Evidence {text: $evidence_text})
-                    MERGE (f)-[:SUPPORTED_BY]->(e)
-                )
-                """,
-                case_id=case_id,
-                agent_name=str(agent_name),
-                finding_text=str(finding_text),
-                evidence_text=str(evidence_text),
+            driver = GraphDatabase.driver(
+                NEO4J_URI,
+                auth=(NEO4J_USERNAME, NEO4J_PASSWORD),
             )
+
+            with driver.session(database=NEO4J_DATABASE) as session:
+                session.run(
+                    """
+                    MERGE (c:Case {id: $case_id})
+                    """,
+                    case_id=case_id,
+                )
+
+                for analysis in result.get("analyses", []):
+                    agent_name = get_value(
+                        analysis,
+                        "agent",
+                        "Specialist Agent",
+                    )
+
+                    session.run(
+                        """
+                        MERGE (c:Case {id: $case_id})
+                        MERGE (a:Agent {name: $agent_name})
+                        MERGE (c)-[:ANALYZED_BY]->(a)
+                        """,
+                        case_id=case_id,
+                        agent_name=str(agent_name),
+                    )
+
+                    for finding in get_value(
+                        analysis,
+                        "findings",
+                        [],
+                    ):
+                        finding_text = get_value(
+                            finding,
+                            "finding",
+                            "",
+                        )
+
+                        evidence_text = get_value(
+                            finding,
+                            "evidence",
+                            "",
+                        )
+
+                        if not finding_text:
+                            continue
+
+                        session.run(
+                            """
+                            MERGE (c:Case {id: $case_id})
+                            MERGE (a:Agent {name: $agent_name})
+                            MERGE (f:Finding {
+                                case_id: $case_id,
+                                text: $finding_text
+                            })
+
+                            MERGE (c)-[:ANALYZED_BY]->(a)
+                            MERGE (a)-[:FOUND]->(f)
+
+                            WITH f
+                            FOREACH (_ IN CASE
+                                WHEN $evidence_text <> "" THEN [1]
+                                ELSE []
+                            END |
+                                MERGE (e:Evidence {text: $evidence_text})
+                                MERGE (f)-[:SUPPORTED_BY]->(e)
+                            )
+                            """,
+                            case_id=case_id,
+                            agent_name=str(agent_name),
+                            finding_text=str(finding_text),
+                            evidence_text=str(evidence_text),
+                        )
 
             driver.close()
 
@@ -1032,7 +1028,6 @@ if analyze_clicked:
             )
 
         except Exception as e:
-
             status.update(
                 label="Pipeline encountered an error.",
                 state="error",
