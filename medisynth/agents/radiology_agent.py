@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 from llm_client import call_vision_llm_json
 from models.schemas import AgentAnalysis
 
@@ -76,4 +75,3 @@ class RadiologyAgent:
         }
 
         return findings
->>>>>>> origin/main
