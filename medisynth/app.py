@@ -941,64 +941,64 @@ if analyze_clicked:
             )
 
             # Save MediSynth evidence graph to Neo4j
-driver = GraphDatabase.driver(
-    NEO4J_URI,
-    auth=(NEO4J_USERNAME, NEO4J_PASSWORD),
-)
-
-with driver.session(database=NEO4J_DATABASE) as session:
-
-    session.run(
-        """
-        MERGE (c:Case {id: $case_id})
-        """,
-        case_id=case_id,
-    )
-
-    for analysis in result.get("analyses", []):
-
-        agent_name = get_value(
-            analysis,
-            "agent",
-            "Specialist Agent"
+             driver = GraphDatabase.driver(
+             NEO4J_URI,
+             auth=(NEO4J_USERNAME, NEO4J_PASSWORD),
         )
 
-        session.run(
-            """
-            MERGE (c:Case {id: $case_id})
-            MERGE (a:Agent {name: $agent_name})
-            MERGE (c)-[:ANALYZED_BY]->(a)
-            """,
-            case_id=case_id,
-            agent_name=str(agent_name),
-        )
-
-        for finding in get_value(
-            analysis,
-            "findings",
-            []
-        ):
-
-            finding_text = get_value(
-                finding,
-                "finding",
-                ""
-            )
-
-            evidence_text = get_value(
-                finding,
-                "evidence",
-                ""
-            )
-
-            if not finding_text:
-                continue
+        with driver.session(database=NEO4J_DATABASE) as session:
 
             session.run(
+              """
+            MERGE (c:Case {id: $case_id})
+              """,
+            case_id=case_id,
+         )
+
+         for analysis in result.get("analyses", []):
+
+             agent_name = get_value(
+                analysis,
+               "agent",
+               "Specialist Agent"
+             )
+
+              session.run(
                 """
                 MERGE (c:Case {id: $case_id})
                 MERGE (a:Agent {name: $agent_name})
-                MERGE (f:Finding {
+                MERGE (c)-[:ANALYZED_BY]->(a)
+                """,
+                case_id=case_id,
+                agent_name=str(agent_name),
+             )
+
+             for finding in get_value(
+                analysis,
+                "findings",
+                []
+             ):
+
+                 finding_text = get_value(
+                    finding,
+                    "finding",
+                     ""
+                 )
+
+               evidence_text = get_value(
+                  finding,
+                  "evidence",
+                   ""
+               )
+
+               if not finding_text:
+                  continue
+
+               session.run(
+                  """
+                  MERGE (c:Case {id: $case_id})
+                  MERGE (a:Agent {name: $agent_name})
+                  MERGE (f:Finding {
                     case_id: $case_id,
                     text: $finding_text
                 })
@@ -1021,7 +1021,7 @@ with driver.session(database=NEO4J_DATABASE) as session:
                 evidence_text=str(evidence_text),
             )
 
-driver.close()
+            driver.close()
 
             st.session_state["result"] = result
             st.session_state["case_id"] = case_id
