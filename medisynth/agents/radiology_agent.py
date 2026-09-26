@@ -56,7 +56,6 @@ Return only valid JSON using this structure:
     )
 
     return AgentAnalysis(**data)
-=======
 class RadiologyAgent:
     def __init__(self):
         self.name = "Radiology Agent"
