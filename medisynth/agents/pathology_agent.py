@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 from llm_client import call_llm_json
 from models.schemas import AgentAnalysis
 
@@ -29,7 +29,6 @@ Confidence must be a number between 0 and 1.
     data = call_llm_json(prompt,"pathology")
 
     return AgentAnalysis(**data)
-=======
 class PathologyAgent:
     def __init__(self):
         self.name = "Pathology Agent"
@@ -84,4 +83,3 @@ if __name__ == "__main__":
     result = agent.analyze(sample_report)
 
     print(result)
->>>>>>> origin/main
