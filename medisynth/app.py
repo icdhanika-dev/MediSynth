@@ -941,7 +941,7 @@ if analyze_clicked:
             )
 
             # Save MediSynth evidence graph to Neo4j
-             driver = GraphDatabase.driver(
+        driver = GraphDatabase.driver(
              NEO4J_URI,
              auth=(NEO4J_USERNAME, NEO4J_PASSWORD),
         )
