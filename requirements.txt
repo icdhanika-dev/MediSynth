@@ -1,0 +1,3 @@
+streamlit-agraph
+PyMuPDF
+neo4j
