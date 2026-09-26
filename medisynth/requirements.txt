@@ -3,3 +3,4 @@ streamlit
 neo4j
 PyMuPDF
 python-dotenv
+langgraph
